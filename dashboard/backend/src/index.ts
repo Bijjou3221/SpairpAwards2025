@@ -190,8 +190,8 @@ app.post('/api/auth/login', async (req, res) => {
         // 5. Set HttpOnly Cookie
         res.cookie('token', jwtToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production', // False on dev (http), True on prod (https)
-            sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // Lax for easier dev flows
+            secure: true, // Always true for SameSite=None
+            sameSite: 'none', // Required for Cross-Domain (frontend.com vs backend.render.com)
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
@@ -206,7 +206,11 @@ app.post('/api/auth/login', async (req, res) => {
 
 // Logout Helper
 app.post('/api/auth/logout', (req, res) => {
-    res.clearCookie('token');
+    res.clearCookie('token', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none'
+    });
     res.json({ success: true });
 });
 
