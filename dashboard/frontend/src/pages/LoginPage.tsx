@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { loginWithDiscord } from '../api/client';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Countdown } from '../components/Countdown';
 import { ForbiddenPage } from './ForbiddenPage';
 import {
@@ -37,6 +37,9 @@ export const LoginPage = () => {
     const [currentBgIndex, setCurrentBgIndex] = useState(0);
     const [unauthorizedUser, setUnauthorizedUser] = useState<any>(null);
     const [showLegalModal, setShowLegalModal] = useState(false);
+    const [showIntro, setShowIntro] = useState(() => {
+        return !sessionStorage.getItem('hasSeenIntro');
+    });
 
     // 3D Tilt Hook Logic
     const x = useMotionValue(0);
@@ -55,8 +58,21 @@ export const LoginPage = () => {
         const interval = setInterval(() => {
             setCurrentBgIndex((prev) => (prev + 1) % BACKGROUND_IMAGES.length);
         }, 8000); // Change every 8 seconds
+
+        // Intro Timer
+        if (showIntro) {
+            const timer = setTimeout(() => {
+                setShowIntro(false);
+                sessionStorage.setItem('hasSeenIntro', 'true');
+            }, 3500); // Intro duration
+            return () => {
+                clearInterval(interval);
+                clearTimeout(timer);
+            };
+        }
+
         return () => clearInterval(interval);
-    }, []);
+    }, [showIntro]);
 
     const codeProcessed = useRef(false);
 
@@ -121,7 +137,13 @@ export const LoginPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-gold/30 relative overflow-hidden">
+        <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-gold/30 relative overflow-hidden cursor-none">
+
+            <CustomCursor />
+
+            <AnimatePresence>
+                {showIntro && <IntroAnimation onComplete={() => setShowIntro(false)} />}
+            </AnimatePresence>
 
             {/* --- IMMERSIVE BACKGROUND SLIDESHOW --- */}
             <AnimatePresence mode="wait">
@@ -316,7 +338,7 @@ const RequirementItem = ({ text }: { text: string }) => (
 );
 
 const LegalModal = ({ onClose }: { onClose: () => void }) => (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 cursor-auto">
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -369,3 +391,116 @@ const LegalModal = ({ onClose }: { onClose: () => void }) => (
         </motion.div>
     </div>
 );
+
+// --- VISUAL ENHANCEMENT COMPONENTS ---
+
+const CustomCursor = () => {
+    const cursorX = useMotionValue(-100);
+    const cursorY = useMotionValue(-100);
+    const springConfig = { damping: 25, stiffness: 700 };
+    const cursorXSpring = useSpring(cursorX, springConfig);
+    const cursorYSpring = useSpring(cursorY, springConfig);
+
+    useEffect(() => {
+        const moveCursor = (e: MouseEvent) => {
+            cursorX.set(e.clientX - 16);
+            cursorY.set(e.clientY - 16);
+        };
+        window.addEventListener('mousemove', moveCursor);
+        return () => window.removeEventListener('mousemove', moveCursor);
+    }, []);
+
+    return (
+        <div className="pointer-events-none fixed inset-0 z-[100] overflow-hidden hidden md:block">
+            <motion.div
+                className="absolute w-8 h-8 border border-gold rounded-full flex items-center justify-center opacity-50"
+                style={{ x: cursorXSpring, y: cursorYSpring }}
+            >
+                <div className="w-1 h-1 bg-gold rounded-full" />
+            </motion.div>
+        </div>
+    );
+};
+
+const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
+    return (
+        <motion.div
+            className="fixed inset-0 z-[60] bg-black flex flex-col items-center justify-center"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
+        >
+            <div className="relative">
+                {/* Particles Effect (Simulated) */}
+                {[...Array(20)].map((_, i) => (
+                    <motion.div
+                        key={i}
+                        className="absolute w-1 h-1 bg-gold rounded-full"
+                        initial={{
+                            x: 0,
+                            y: 0,
+                            opacity: 0
+                        }}
+                        animate={{
+                            x: (Math.random() - 0.5) * 400,
+                            y: (Math.random() - 0.5) * 400,
+                            opacity: [0, 1, 0],
+                            scale: [0, 1.5, 0]
+                        }}
+                        transition={{
+                            duration: 2,
+                            ease: "easeOut",
+                            delay: 0.5
+                        }}
+                    />
+                ))}
+
+                <motion.div
+                    initial={{ scale: 0.8, opacity: 0, filter: "blur(10px)" }}
+                    animate={{ scale: 1, opacity: 1, filter: "blur(0px)" }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="flex flex-col items-center gap-6"
+                >
+                    <div className="relative w-32 h-32">
+                        <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            className="absolute inset-0 rounded-full border-t border-gold/50"
+                        />
+                        <img
+                            src="https://imgur.com/aZMcktO.png"
+                            alt="Logo"
+                            className="w-full h-full object-cover rounded-full shadow-[0_0_50px_rgba(212,175,55,0.2)]"
+                        />
+                    </div>
+
+                    <div className="text-center">
+                        <motion.h1
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            className="text-4xl font-black text-white tracking-widest"
+                        >
+                            SPAINRP
+                        </motion.h1>
+                        <motion.h2
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.8 }}
+                            className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-gold via-yellow-200 to-yellow-600 drop-shadow-[0_0_15px_rgba(212,175,55,0.5)]"
+                        >
+                            AWARDS
+                        </motion.h2>
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.5 }}
+                            className="text-gold/50 text-sm tracking-[0.5em] mt-2 uppercase"
+                        >
+                            2025 Edition
+                        </motion.p>
+                    </div>
+                </motion.div>
+            </div>
+        </motion.div>
+    );
+};
