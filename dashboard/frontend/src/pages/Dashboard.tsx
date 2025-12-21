@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { getConfig, getStats } from '../api/client';
-import type { AwardConfigType } from '../types';
 import { useNavigate } from 'react-router-dom';
 import { RefreshCw } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
