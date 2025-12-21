@@ -21,6 +21,7 @@ import Vote from './models/Vote';
 dotenv.config({ path: '../../.env' });
 
 const app = express();
+app.set('trust proxy', 1); // Confía en el primer proxy (Render Load Balancer)
 const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'https://spainrp.xyz'; // Keep localhost as fallback only for local dev if env missing, but secrets must be env.
 const API_SECRET_KEY = process.env.API_SECRET_KEY;
@@ -144,6 +145,15 @@ const authMiddleware = (req: express.Request, res: express.Response, next: expre
 };
 
 // --- RUTAS ---
+
+// Root Route (Welcome Message)
+app.get('/', (req, res) => {
+    res.json({
+        message: '🏆 SpainRP Awards 2025 API',
+        status: 'Online',
+        version: '1.0.0',
+    });
+});
 
 // Login: Intercambia código por token y verifica admin
 app.post('/api/auth/login', async (req, res) => {
@@ -334,6 +344,8 @@ app.get('/api/health', async (req, res) => {
 // SSL/TLS & Server Startup
 const startServer = () => {
     try {
+        // En Producción (Render), el SSL lo maneja el Load Balancer, así que la app corre en HTTP internamente.
+        // Solo usamos HTTPS local si tenemos los certificados manualmente.
         if (fs.existsSync('server.key') && fs.existsSync('server.cert')) {
             const httpsOptions = {
                 key: fs.readFileSync('server.key'),
@@ -349,8 +361,6 @@ const startServer = () => {
         }
     } catch (e) {
         console.error('Error iniciando servidor:', e);
-        // Fallback
-        app.listen(PORT, () => console.log(`🚀 Backend iniciado en el puerto ${PORT} (Modo Fallback)`));
     }
 };
 

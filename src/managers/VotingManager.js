@@ -274,34 +274,44 @@ class VotingManager {
 
             await message.reply({ embeds: [confirmEmbed] });
 
-            // Admin Log
-            const adminId = config.adminId === 'TU_ID_AQUI' ? process.env.ADMIN_ID : config.adminId;
-            if (adminId && this.client) {
-                const admin = await this.client.users.fetch(adminId).catch(() => null);
-                if (admin) {
-                    let details = '';
-                    const entries = Object.entries(session.votes);
-                    entries.forEach(([catId, candVal], index) => {
-                        const cat = config.awards.find(c => c.id === catId);
-                        const cand = cat?.candidates.find(c => c.value === candVal);
+            // Admin Log - Send to ALL admins
+            const envAdminIds = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
+            
+            if (envAdminIds.length > 0 && this.client) {
+                let details = '';
+                const entries = Object.entries(session.votes);
+                entries.forEach(([catId, candVal], index) => {
+                    const cat = config.awards.find(c => c.id === catId);
+                    const cand = cat?.candidates.find(c => c.value === candVal);
 
-                        details += `**${cat ? cat.title.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').trim() : catId}**\n` +
-                            `└ ${cand ? `${cand.emoji} \`${cand.label}\`` : `\`${candVal}\``}\n`;
+                    details += `**${cat ? cat.title.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').trim() : catId}**\n` +
+                        `└ ${cand ? `${cand.emoji} \`${cand.label}\`` : `\`${candVal}\``}\n`;
 
-                        if (index < entries.length - 1) details += `⠀╵\n`;
-                    });
+                    if (index < entries.length - 1) details += `⠀╵\n`;
+                });
 
-                    const logEmbed = new EmbedBuilder()
-                        .setTitle('🗳️ Nuevo Voto Emitido')
-                        .addFields(
-                            { name: '👤 Usuario', value: `<@${message.author.id}>`, inline: true },
-                            { name: '🎮 Roblox', value: `\`${robloxUser}\``, inline: true },
-                            { name: '🆔 ID', value: `\`${message.author.id}\``, inline: true }
-                        )
-                        .setDescription(`**📋 Boleta Electoral:**\n\n${details}`)
-                        .setColor(0x3498DB)
-                        .setTimestamp();
-                    await admin.send({ embeds: [logEmbed] }).catch(() => { });
+                const logEmbed = new EmbedBuilder()
+                    .setTitle('🗳️ Nuevo Voto Emitido')
+                    .addFields(
+                        { name: '<:735812user:1451314698094903297> Usuario', value: `<@${message.author.id}>`, inline: true },
+                        { name: '<:verifed:1451314554482069725> Roblox', value: `\`${robloxUser}\``, inline: true },
+                        { name: '<:441127discord:1451314696543015209> ID', value: `\`${message.author.id}\``, inline: true }
+                    )
+                    .setDescription(`**<:54186bluevote:1451987934193516634> Boleta Electoral:**\n\n${details}`)
+                    .setColor(0x3498DB)
+                    .setFooter({ text: 'Ver mas detalles en spainrp.xyz' })
+                    .setTimestamp();
+
+                // Send to each admin
+                for (const adminId of envAdminIds) {
+                    try {
+                        const admin = await this.client.users.fetch(adminId).catch(() => null);
+                        if (admin) {
+                            await admin.send({ embeds: [logEmbed] });
+                        }
+                    } catch (err) {
+                        console.error(`Failed to send log to admin ${adminId}:`, err);
+                    }
                 }
             }
 

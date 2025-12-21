@@ -14,9 +14,13 @@ const { generateResultsImage, generateDetailedLogImage } = require('../utils/res
 async function handleCommand(interaction, client) {
     const { commandName } = interaction;
     const config = ConfigManager.get();
-    const adminId = config.adminId === 'TU_ID_AQUI' ? process.env.ADMIN_ID : config.adminId;
 
-    if (interaction.user.id !== adminId) {
+    // Get admins from ENV or fallback to singular config (supporting legacy)
+    const envAdminIds = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
+    const configAdminId = config.adminId === 'TU_ID_AQUI' ? null : config.adminId;
+    const allowedIds = new Set([...envAdminIds, configAdminId].filter(Boolean));
+
+    if (!allowedIds.has(interaction.user.id)) {
         return interaction.reply({
             content: '⛔ **Acceso Denegado:** No tienes permisos de administrador.',
             flags: [MessageFlags.Ephemeral]
