@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import useSWR from 'swr';
 import { getConfig, getStats } from '../api/client';
 import type { AwardConfigType } from '../types';
 import { useNavigate } from 'react-router-dom';
@@ -12,18 +13,39 @@ import { OverviewTab } from '../components/dashboard/OverviewTab';
 import { VotersTab } from '../components/dashboard/VotersTab';
 import { ConfigTab } from '../components/dashboard/ConfigTab';
 
+const fetcher = async () => {
+    const [config, stats] = await Promise.all([getConfig(), getStats()]);
+    return { config, stats };
+};
+
 export const Dashboard = () => {
     const navigate = useNavigate();
-    const [config, setConfig] = useState<AwardConfigType | null>(null);
-    const [stats, setStats] = useState<any>(null);
     const [activeTab, setActiveTab] = useState<'overview' | 'voters' | 'config'>('overview');
 
     // User Info
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-    // Fetch Initial Data
+    // SWR Data Fetching (Auto Refresh every 30s)
+    const { data, error, isLoading, mutate } = useSWR('dashboard-data', fetcher, {
+        refreshInterval: 30000, // 30 seconds
+        revalidateOnFocus: false,
+        onError: (err) => {
+            console.error('SWR Error:', err);
+            if (err?.response?.status === 401 || err?.response?.status === 403) {
+                localStorage.removeItem('token');
+                navigate('/');
+            }
+        }
+    });
+
     useEffect(() => {
-        loadData();
+        if (data) {
+            // Optional: Show a subtle toast or nothing on silent refresh
+            // toast.success("Datos actualizados");
+        }
+    }, [data]);
+
+    useEffect(() => {
         toast.success(`Bienvenido de nuevo, ${user.username || 'Admin'}!`, {
             description: 'Conexión segura establecida con el servidor.',
             duration: 4000,
@@ -31,22 +53,12 @@ export const Dashboard = () => {
         });
     }, []);
 
-    const loadData = async () => {
-        try {
-            const [cfg, sts] = await Promise.all([getConfig(), getStats()]);
-            setConfig(cfg);
-            setStats(sts);
-        } catch (e) {
-            console.error(e);
-            localStorage.removeItem('token');
-            navigate('/');
-        }
-    };
-
     const handleLogout = () => {
         localStorage.removeItem('token');
         navigate('/');
     };
+
+    if (error) return <div>Error cargando datos...</div>;
 
     return (
         <div className="min-h-screen bg-[#0a0a0a] text-gray-200 flex font-sans selection:bg-gold/30 overflow-hidden">
@@ -56,7 +68,7 @@ export const Dashboard = () => {
                 setActiveTab={setActiveTab}
                 user={user}
                 handleLogout={handleLogout}
-                totalVotes={stats?.totalVotes}
+                totalVotes={data?.stats?.totalVotes}
             />
 
             {/* Main Content */}
@@ -85,8 +97,8 @@ export const Dashboard = () => {
                         </div>
                         <div className="flex gap-4">
                             <button
-                                onClick={loadData}
-                                className="p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition-all border border-white/5 hover:rotate-180 duration-500 shadow-lg backdrop-blur-md"
+                                onClick={() => mutate()}
+                                className={`p-3 bg-white/5 hover:bg-white/10 rounded-full text-white transition-all border border-white/5 shadow-lg backdrop-blur-md ${isLoading ? 'animate-spin' : ''}`}
                                 title="Actualizar Datos"
                             >
                                 <RefreshCw size={22} />
@@ -95,14 +107,25 @@ export const Dashboard = () => {
                     </header>
 
                     <AnimatePresence mode="wait">
-                        {activeTab === 'overview' && config && (
-                            <OverviewTab stats={stats} config={config} />
-                        )}
-                        {activeTab === 'voters' && config && (
-                            <VotersTab stats={stats} config={config} />
-                        )}
-                        {activeTab === 'config' && config && (
-                            <ConfigTab config={config} setConfig={setConfig} />
+                        {isLoading && !data ? (
+                            // Premium Skeleton Loading
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="h-48 bg-white/5 rounded-2xl border border-white/5 backdrop-blur-sm"></div>
+                                ))}
+                            </div>
+                        ) : (
+                            <>
+                                {activeTab === 'overview' && data && (
+                                    <OverviewTab stats={data.stats} config={data.config} />
+                                )}
+                                {activeTab === 'voters' && data && (
+                                    <VotersTab stats={data.stats} config={data.config} />
+                                )}
+                                {activeTab === 'config' && data && (
+                                    <ConfigTab config={data.config} setConfig={(newConfig: any) => mutate({ ...data, config: newConfig }, false)} />
+                                )}
+                            </>
                         )}
                     </AnimatePresence>
                 </div>

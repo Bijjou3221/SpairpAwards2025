@@ -33,8 +33,8 @@ async function handleCommand(interaction, client) {
         await ConfigManager.load();
 
         const embed = new EmbedBuilder()
-            .setTitle('<:spainrp_iconoremovebgpreview:1451314972339601488> SpainRP Awards 2025')
             .setDescription(
+                `# <:spainrp_iconoremovebgpreview:1451314972339601488> SpainRP Awards 2025\n\n` +
                 `> *Celebramos la **excelencia**, el **talento** y la **dedicación** de nuestra comunidad.*\n\n` +
                 `<:mcheartfull91:1451314725785833553> **TU VOTO DECIDE LA HISTORIA**\n` +
                 `El poder está en tus manos. Elige a quienes marcaron la diferencia este año.\n\n` +

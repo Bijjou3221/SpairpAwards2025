@@ -15,6 +15,13 @@ const client = axios.create({
 client.interceptors.request.use((config) => {
     // 1. Client Key (Para evitar error 502/Soup)
     config.headers['X-Client-Key'] = CLIENT_SECRET_KEY;
+
+    // 2. Auth Token (LocalStorage Fallback for Mobile)
+    const token = localStorage.getItem('token');
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+    }
+
     return config;
 });
 

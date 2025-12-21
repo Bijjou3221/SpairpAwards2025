@@ -205,8 +205,8 @@ app.post('/api/auth/login', async (req, res) => {
             maxAge: 24 * 60 * 60 * 1000 // 24 hours
         });
 
-        // Return user info, but NOT the token (it's in the cookie now)
-        res.json({ success: true, user });
+        // Return user info AND token for LocalStorage fallback (Fix Mobile Login)
+        res.json({ success: true, user, token: jwtToken });
 
     } catch (error: any) {
         logger.error('Error Auth:', error.response?.data || error.message);

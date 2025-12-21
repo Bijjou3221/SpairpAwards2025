@@ -59,6 +59,44 @@ client.once('clientReady', async () => {
     console.log(`🤖 [BOT] Sesión iniciada como ${client.user.tag}`);
     await ConfigManager.load();
     await refreshCommands();
+
+    // Rotación de Estado (Presencia)
+    const GALA_DATE = new Date('2025-12-26T20:00:00');
+
+    const getCountdown = () => {
+        const now = new Date();
+        const diff = GALA_DATE - now;
+        if (diff <= 0) return '¡La Gala es HOY!';
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        return `Faltan ${days}d ${hours}h para la Gala`;
+    };
+
+    const baseActivities = [
+        { name: 'quién será el ganador...', type: 3 }, // Watching
+        { name: 'la Gala en Directo', type: 3 },       // Watching
+        { name: 'a los nominados temblar', type: 3 },  // Watching
+        { name: 'spainrp.xyz', type: 3 },              // Watching
+        { name: 'Supervisando votaciones', type: 3 }
+    ];
+
+    let i = 0;
+    setInterval(() => {
+        // Intercalar countdown cada 2 estados
+        let activity;
+        if (i % 2 === 0) {
+            activity = { name: getCountdown(), type: 3 }; // Watching time
+        } else {
+            const index = Math.floor(i / 2) % baseActivities.length;
+            activity = baseActivities[index];
+        }
+
+        client.user.setPresence({
+            activities: [activity],
+            status: 'dnd', // No molestar (Rojo)
+        });
+        i++;
+    }, 8000); // Cambia cada 8 segundos
 });
 
 client.on('interactionCreate', (interaction) => handleInteraction(interaction, client));
