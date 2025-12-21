@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 import { getConfig, getStats } from '../api/client';
 import { useNavigate } from 'react-router-dom';
-import { RefreshCw } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { RefreshCw, ChevronsRight, Lock, Unlock } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 
@@ -21,6 +21,9 @@ const fetcher = async () => {
 export const Dashboard = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<'overview' | 'voters' | 'config'>('overview');
+    const [showEntrance, setShowEntrance] = useState(() => {
+        return !sessionStorage.getItem('hasSeenDashboardEntrance');
+    });
 
     // User Info
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -52,27 +55,44 @@ export const Dashboard = () => {
             icon: '👋'
         });
 
-        // Fireworks Effect
-        const duration = 3 * 1000;
-        const animationEnd = Date.now() + duration;
-        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
-        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+        // Fireworks Logic - Trigger AFTER entrance or immediately if no entrance
+        const startFireworks = () => {
+            const duration = 3 * 1000;
+            const animationEnd = Date.now() + duration;
+            const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+            const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
 
-        const interval = setInterval(function () {
-            const timeLeft = animationEnd - Date.now();
+            const interval = setInterval(function () {
+                const timeLeft = animationEnd - Date.now();
 
-            if (timeLeft <= 0) {
-                clearInterval(interval);
-                return;
-            }
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    return;
+                }
 
-            const particleCount = 50 * (timeLeft / duration);
-            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-        }, 250);
+                const particleCount = 50 * (timeLeft / duration);
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+            }, 250);
+        };
 
-        return () => clearInterval(interval);
-    }, []);
+        if (!showEntrance) {
+            startFireworks();
+        } else {
+            // If entrance is showing, we'll trigger from the onComplete of the entrance
+        }
+    }, [showEntrance]);
+
+    const handleEntranceComplete = () => {
+        setShowEntrance(false);
+        sessionStorage.setItem('hasSeenDashboardEntrance', 'true');
+        // Trigger fireworks manually here if needed, or rely on the effect dependency change if structured that way.
+        // Simplified: Just re-trigger fireworks logic or move it to a function.
+        // Actually, since we want fireworks *right after* the doors open/start opening, 
+        // we can trigger it in the Entrance component's exit or just call it here.
+        // Let's refactor the fireworks to a reuseable function inside useEffect? 
+        // Easier: Just let the useEffect above run when showEntrance changes to false.
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -82,7 +102,14 @@ export const Dashboard = () => {
     if (error) return <div>Error cargando datos...</div>;
 
     return (
-        <div className="min-h-screen bg-[#0a0a0a] text-gray-200 flex font-sans selection:bg-gold/30 overflow-hidden">
+        <div className="min-h-screen bg-[#0a0a0a] text-gray-200 flex font-sans selection:bg-gold/30 overflow-hidden relative">
+
+            <AnimatePresence>
+                {showEntrance && (
+                    <GoldenEntrance onComplete={handleEntranceComplete} />
+                )}
+            </AnimatePresence>
+
             {/* Sidebar Component */}
             <Sidebar
                 activeTab={activeTab}
@@ -152,5 +179,111 @@ export const Dashboard = () => {
                 </div>
             </main>
         </div>
+    );
+};
+
+const GoldenEntrance = ({ onComplete }: { onComplete: () => void }) => {
+    useEffect(() => {
+        const timer = setTimeout(onComplete, 10000); // 10 seconds auto-skip
+        return () => clearTimeout(timer);
+    }, [onComplete]);
+
+    return (
+        <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center pointer-events-auto"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 1, delay: 0.5 } }} // Fade out container after doors open
+        >
+            {/* Left Door */}
+            <motion.div
+                initial={{ x: 0 }}
+                exit={{ x: '-100%', transition: { duration: 1.5, ease: [0.76, 0, 0.24, 1] } }}
+                className="absolute left-0 top-0 w-1/2 h-full bg-[#050505] border-r-2 border-gold/50 flex items-center justify-end pr-10 shadow-[5px_0_50px_rgba(0,0,0,0.8)] z-20"
+            >
+                <div className="bg-[linear-gradient(45deg,transparent_25%,rgba(212,175,55,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] absolute inset-0 opacity-20"></div>
+                <div className="text-right opacity-50">
+                    <Lock className="w-24 h-24 text-gold/20" />
+                </div>
+            </motion.div>
+
+            {/* Right Door */}
+            <motion.div
+                initial={{ x: 0 }}
+                exit={{ x: '100%', transition: { duration: 1.5, ease: [0.76, 0, 0.24, 1] } }}
+                className="absolute right-0 top-0 w-1/2 h-full bg-[#050505] border-l-2 border-gold/50 flex items-center justify-start pl-10 shadow-[-5px_0_50px_rgba(0,0,0,0.8)] z-20"
+            >
+                <div className="bg-[linear-gradient(-45deg,transparent_25%,rgba(212,175,55,0.05)_50%,transparent_75%,transparent_100%)] bg-[length:20px_20px] absolute inset-0 opacity-20"></div>
+                <div className="text-left opacity-50">
+                    <Lock className="w-24 h-24 text-gold/20" />
+                </div>
+            </motion.div>
+
+            {/* Center Content (Badge / Logo Validation) */}
+            <motion.div
+                className="relative z-30 flex flex-col items-center gap-6"
+                exit={{ scale: 0.8, opacity: 0, transition: { duration: 0.5 } }}
+            >
+                <motion.div
+                    initial={{ scale: 0.5, opacity: 0, rotateY: 90 }}
+                    animate={{ scale: 1, opacity: 1, rotateY: 0 }}
+                    transition={{ duration: 1.5, ease: "easeOut" }}
+                    className="relative w-40 h-40"
+                >
+                    <div className="absolute inset-0 bg-gold/20 blur-[50px] rounded-full animate-pulse"></div>
+                    <img
+                        src="https://imgur.com/aZMcktO.png"
+                        alt="Logo"
+                        className="w-full h-full object-cover rounded-full border-4 border-gold/30 shadow-[0_0_30px_rgba(212,175,55,0.4)]"
+                    />
+                    <motion.div
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 2, delay: 1 }}
+                        className="absolute -inset-4 rounded-full border border-gold/50 border-dashed animate-spin-slow"
+                        style={{ padding: '10px' }}
+                    />
+                </motion.div>
+
+                <div className="text-center space-y-2">
+                    <motion.h2
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 1.5 }}
+                        className="text-2xl font-bold text-white tracking-[0.2em]"
+                    >
+                        BIENVENIDO
+                    </motion.h2>
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 2.5 }}
+                        className="flex items-center gap-2 justify-center text-gold text-sm font-mono uppercase"
+                    >
+                        <Unlock size={14} />
+                        <span>Verificando Credenciales...</span>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1, color: '#4ade80' }} // Green color
+                        transition={{ delay: 4.5 }}
+                        className="text-xs font-bold tracking-widest uppercase border border-white/10 bg-white/5 py-1 px-3 rounded-full"
+                    >
+                        Acceso Concedido
+                    </motion.div>
+                </div>
+            </motion.div>
+
+            {/* Skip Button */}
+            <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2 }}
+                onClick={onComplete}
+                className="absolute bottom-10 z-40 flex items-center gap-2 text-gray-500 hover:text-white transition-colors text-xs uppercase tracking-widest group"
+            >
+                Saltar Intro
+                <ChevronsRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </motion.button>
+        </motion.div>
     );
 };
