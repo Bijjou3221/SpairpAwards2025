@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 const DISCORD_CLIENT_ID = '1382837683788976279';
-const REDIRECT_URI = 'http://localhost:5173';
+const REDIRECT_URI = 'https://spainrp.xyz';
 const AUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
 
 // Imágenes premium para el carrusel de fondo

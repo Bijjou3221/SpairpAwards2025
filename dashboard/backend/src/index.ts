@@ -22,8 +22,13 @@ dotenv.config({ path: '../../.env' });
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const API_SECRET_KEY = process.env.API_SECRET_KEY || 'super_secret_encryption_key_2025';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'https://spainrp.xyz'; // Keep localhost as fallback only for local dev if env missing, but secrets must be env.
+const API_SECRET_KEY = process.env.API_SECRET_KEY;
+
+if (!API_SECRET_KEY) {
+    console.error("❌ CRITICAL ERROR: API_SECRET_KEY is missing in .env"); // Using console.error here as logger might not be fully initialized or configured for critical errors yet.
+    process.exit(1);
+}
 
 // --- WINSTON LOGGER SETUP ---
 const logDir = 'logs';
@@ -129,7 +134,7 @@ const authMiddleware = (req: express.Request, res: express.Response, next: expre
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_dev_key');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET!);
         (req as any).user = decoded;
         next();
     } catch (e) {
@@ -151,7 +156,7 @@ app.post('/api/auth/login', async (req, res) => {
             code,
             scope: 'identify',
             grantType: 'authorization_code',
-            redirectUri: 'http://localhost:5173',
+            redirectUri: FRONTEND_URL, // Must match the frontend's origin
         });
 
         // 2. Obtener usuario
@@ -173,9 +178,10 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         // 4. Generar JWT
+        if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET missing");
         const jwtToken = jwt.sign(
             { id: user.id, username: user.username, avatar: user.avatar },
-            process.env.JWT_SECRET || 'secret_dev_key',
+            process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -330,17 +336,17 @@ const startServer = () => {
                 cert: fs.readFileSync('server.cert')
             };
             https.createServer(httpsOptions, app).listen(PORT, () => {
-                console.log(`� Backend Seguro (HTTPS) corriendo en https://localhost:${PORT}`);
+                console.log(`🟢 Backend Seguro (HTTPS) iniciado en el puerto ${PORT}`);
             });
         } else {
             app.listen(PORT, () => {
-                console.log(`�🚀 Backend corriendo en http://localhost:${PORT} (Sin SSL - Agrega server.key/server.cert para HTTPS)`);
+                console.log(`🚀 Backend iniciado en el puerto ${PORT}`);
             });
         }
     } catch (e) {
         console.error('Error iniciando servidor:', e);
         // Fallback
-        app.listen(PORT, () => console.log(`🚀 Backend corriendo en http://localhost:${PORT}`));
+        app.listen(PORT, () => console.log(`🚀 Backend iniciado en el puerto ${PORT} (Modo Fallback)`));
     }
 };
 

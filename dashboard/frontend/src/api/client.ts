@@ -1,9 +1,9 @@
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const API_SECRET_KEY = import.meta.env.VITE_API_SECRET_KEY || 'super_secret_encryption_key_2025';
-const CLIENT_SECRET_KEY = import.meta.env.VITE_CLIENT_SECRET_KEY || 'frontend_client_key_123';
+const API_URL = import.meta.env.VITE_API_URL || 'https://spainrp-awards-backend.onrender.com/api';
+const API_SECRET_KEY = import.meta.env.VITE_API_SECRET_KEY
+const CLIENT_SECRET_KEY = import.meta.env.VITE_CLIENT_SECRET_KEY
 
 const client = axios.create({
     baseURL: API_URL,
