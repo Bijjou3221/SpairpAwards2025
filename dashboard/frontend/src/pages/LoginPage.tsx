@@ -11,7 +11,8 @@ import {
     Trophy,
     Vote,
     BarChart3,
-    CheckCircle2
+    CheckCircle2,
+    X
 } from 'lucide-react';
 
 const DISCORD_CLIENT_ID = '1382837683788976279';
@@ -35,6 +36,7 @@ export const LoginPage = () => {
     const [error, setError] = useState('');
     const [currentBgIndex, setCurrentBgIndex] = useState(0);
     const [unauthorizedUser, setUnauthorizedUser] = useState<any>(null);
+    const [showLegalModal, setShowLegalModal] = useState(false);
 
     // 3D Tilt Hook Logic
     const x = useMotionValue(0);
@@ -262,6 +264,13 @@ export const LoginPage = () => {
                 </div>
             </main>
 
+            {/* Legal Modal */}
+            <AnimatePresence>
+                {showLegalModal && (
+                    <LegalModal onClose={() => setShowLegalModal(false)} />
+                )}
+            </AnimatePresence>
+
             {/* Footer */}
             <footer className="w-full py-6 relative z-20 mt-auto">
                 <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4">
@@ -274,7 +283,12 @@ export const LoginPage = () => {
                         >
                             Soporte
                         </span>
-                        <span className="cursor-pointer hover:text-white transition-colors">Legal</span>
+                        <span
+                            onClick={() => setShowLegalModal(true)}
+                            className="cursor-pointer hover:text-white transition-colors"
+                        >
+                            Legal
+                        </span>
                     </div>
                 </div>
             </footer>
@@ -298,5 +312,60 @@ const RequirementItem = ({ text }: { text: string }) => (
     <div className="flex items-center gap-3 text-gray-400 text-xs font-medium">
         <div className="w-1.5 h-1.5 rounded-full bg-green-500/50 shadow-[0_0_8px_rgba(34,197,94,0.5)]"></div>
         <span>{text}</span>
+    </div>
+);
+
+const LegalModal = ({ onClose }: { onClose: () => void }) => (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        />
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            className="relative bg-zinc-900 border border-white/10 rounded-2xl p-6 md:p-8 max-w-2xl w-full text-left shadow-2xl max-h-[80vh] overflow-y-auto"
+        >
+            <button
+                onClick={onClose}
+                className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+                <X size={20} />
+            </button>
+
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+                <span className="text-gold">⚖️</span> Información Legal
+            </h2>
+
+            <div className="space-y-6 text-gray-300 text-sm leading-relaxed">
+                <section>
+                    <h3 className="text-white font-semibold text-base mb-2">Política de Privacidad</h3>
+                    <p>Recopilamos tu ID de Discord, nombre de usuario y dirección IP por motivos de seguridad y registro de auditoría. Estos datos son estrictamente confidenciales y se utilizan únicamente para garantizar la integridad del sistema.</p>
+                </section>
+
+                <section>
+                    <h3 className="text-white font-semibold text-base mb-2">Términos de Servicio</h3>
+                    <p>El uso indebido de las herramientas administrativas, intentos de inyección de código o abuso de la API resultará en un baneo permanente de la comunidad SpainRP y la denegación de acceso a futuros eventos.</p>
+                </section>
+
+                <section>
+                    <h3 className="text-white font-semibold text-base mb-2">Descargo de Responsabilidad</h3>
+                    <div className="p-3 bg-white/5 rounded-lg border border-white/5 space-y-2">
+                        <p>• Esta aplicación no está afiliada, asociada ni respaldada oficialmente por Discord Inc.</p>
+                        <p>• Herramienta oficial desarrollada para el evento SpainRP Awards 2025, organizado por el Encargado del Consejo Directivo (Benja) y la administración de SpainRP.</p>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 className="text-white font-semibold text-base mb-2">Créditos y Licencias</h3>
+                    <p>Desarrollado y mantenido por <span className="text-gold font-medium">BijjouPro08</span>.</p>
+                    <p className="text-xs text-gray-500 mt-1">Icons by Lucide • UI powered by React & TailwindCSS</p>
+                </section>
+            </div>
+        </motion.div>
     </div>
 );
