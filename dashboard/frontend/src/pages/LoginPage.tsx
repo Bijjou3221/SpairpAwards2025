@@ -11,8 +11,7 @@ import {
     Trophy,
     Vote,
     BarChart3,
-    CheckCircle2,
-    Heart
+    CheckCircle2
 } from 'lucide-react';
 
 const DISCORD_CLIENT_ID = '1382837683788976279';
