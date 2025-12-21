@@ -6,9 +6,12 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { Toaster } from 'sonner';
 import { StatusPage } from './pages/StatusPage';
 
+import { Analytics } from '@vercel/analytics/react';
+
 function App() {
     return (
         <BrowserRouter>
+            <Analytics />
             <Toaster position="top-center" richColors theme="dark" />
             <Routes>
                 <Route path="/" element={<LoginPage />} />
