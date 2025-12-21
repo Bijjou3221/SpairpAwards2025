@@ -51,19 +51,20 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
   ] as const;
 
   return (
-    <div className="flex items-center my-6 p-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 w-fit">
-      <div className="flex divide-x divide-white/10">
+    <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-0 my-6 p-4 bg-black/40 backdrop-blur-md rounded-xl border border-white/10 w-full sm:w-fit max-w-full">
+      {/* Time Display */}
+      <div className="flex justify-center divide-x divide-white/10 w-full sm:w-auto">
         {isFinished ? (
-          <span className="text-gold font-bold animate-pulse px-4">
+          <span className="text-gold font-bold animate-pulse px-4 text-center text-sm md:text-base">
             ¡El evento ha comenzado!
           </span>
         ) : (
           intervals.map(({ key, label }) => (
-            <div key={key} className="flex flex-col items-center mx-3">
-              <span className="text-3xl font-black text-white tabular-nums tracking-widest drop-shadow-md">
+            <div key={key} className="flex flex-col items-center px-3 sm:px-4 first:pl-0 sm:first:pl-2">
+              <span className="text-2xl sm:text-3xl font-black text-white tabular-nums tracking-widest drop-shadow-md">
                 {timeLeft[key].toString().padStart(2, "0")}
               </span>
-              <span className="text-[10px] uppercase text-gold font-bold tracking-widest mt-1">
+              <span className="text-[9px] sm:text-[10px] uppercase text-gold font-bold tracking-widest mt-1">
                 {label}
               </span>
             </div>
@@ -71,11 +72,12 @@ export const Countdown = ({ targetDate }: { targetDate: string }) => {
         )}
       </div>
 
-      <div className="ml-6 pl-6 border-l border-white/10 flex flex-col justify-center">
-        <span className="text-xs text-gray-400 uppercase tracking-widest">
+      {/* Label / Context */}
+      <div className="flex flex-row sm:flex-col items-center sm:items-start justify-center gap-2 sm:gap-0 w-full sm:w-auto pt-4 sm:pt-0 sm:ml-6 sm:pl-6 border-t sm:border-t-0 border-white/10 sm:border-l sm:border-white/10">
+        <span className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-widest text-center sm:text-left">
           Tiempo restante
         </span>
-        <span className="text-white font-bold text-sm">
+        <span className="text-white font-bold text-xs sm:text-sm text-center sm:text-left">
           Gala de Premios
         </span>
       </div>
