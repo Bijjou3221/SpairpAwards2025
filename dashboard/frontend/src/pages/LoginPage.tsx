@@ -425,11 +425,12 @@ const CustomCursor = () => {
 const IntroAnimation = ({ onComplete }: { onComplete: () => void }) => {
     return (
         <motion.div
-            className="fixed inset-0 z-[60] bg-black flex flex-col items-center justify-center"
+            className="fixed inset-0 z-[60] bg-black flex flex-col items-center justify-center cursor-pointer"
+            onClick={onComplete}
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
         >
-            <div className="relative">
+            <div className="relative pointer-events-none">
                 {/* Particles Effect (Simulated) */}
                 {[...Array(20)].map((_, i) => (
                     <motion.div
