@@ -26,11 +26,21 @@ export const ConfigTab = ({ config, setConfig }: ConfigTabProps) => {
     };
 
     const addCandidate = (catIndex: number) => {
-        const newAwards = [...config.awards];
-        newAwards[catIndex].candidates.push({
-            label: 'Nuevo Candidato',
-            value: `cand_${Date.now()}`,
-            emoji: '🆕'
+        const newAwards = config.awards.map((award, i) => {
+            if (i === catIndex) {
+                return {
+                    ...award,
+                    candidates: [
+                        ...award.candidates,
+                        {
+                            label: 'Nuevo Candidato',
+                            value: `cand_${Date.now()}`,
+                            emoji: '🆕'
+                        }
+                    ]
+                };
+            }
+            return award;
         });
         setConfig({ ...config, awards: newAwards });
     };
