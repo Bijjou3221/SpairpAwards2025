@@ -75,8 +75,8 @@ app.use(morgan('combined', { stream: { write: (message) => logger.info(message.t
 
 // 4. Rate Limiting
 const limiter = rateLimit({
-    windowMs: 10 * 60 * 1000,
-    max: 100,
+    windowMs: 5 * 60 * 1000,
+    max: 1000,
     message: 'Demasiadas peticiones.',
     handler: (req, res, next, options) => {
         logger.warn(`Rate Limit Exceeded: IP ${req.ip}`);
