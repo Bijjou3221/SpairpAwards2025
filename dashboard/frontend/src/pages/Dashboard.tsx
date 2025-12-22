@@ -12,6 +12,7 @@ import { Sidebar } from '../components/dashboard/Sidebar';
 import { OverviewTab } from '../components/dashboard/OverviewTab';
 import { VotersTab } from '../components/dashboard/VotersTab';
 import { ConfigTab } from '../components/dashboard/ConfigTab';
+import { MyVotesTab } from '../components/dashboard/MyVotesTab';
 
 const fetcher = async () => {
     const [config, stats] = await Promise.all([getConfig(), getStats()]);
@@ -20,13 +21,15 @@ const fetcher = async () => {
 
 export const Dashboard = () => {
     const navigate = useNavigate();
-    const [activeTab, setActiveTab] = useState<'overview' | 'voters' | 'config'>('overview');
+    // User Info (moved up to use in state initialization)
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    const [activeTab, setActiveTab] = useState<'overview' | 'voters' | 'config' | 'my-votes'>(
+        user.isAdmin ? 'overview' : 'my-votes'
+    );
     const [showEntrance, setShowEntrance] = useState(() => {
         return !sessionStorage.getItem('hasSeenDashboardEntrance');
     });
-
-    // User Info
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     // SWR Data Fetching (Auto Refresh every 30s)
     const { data, error, isLoading, mutate } = useSWR('dashboard-data', fetcher, {
@@ -136,11 +139,13 @@ export const Dashboard = () => {
                                 {activeTab === 'overview' && 'Dashboard Overview'}
                                 {activeTab === 'voters' && 'Registro de Votantes'}
                                 {activeTab === 'config' && 'Gestión del Evento'}
+                                {activeTab === 'my-votes' && 'Gestión de Votos'}
                             </h2>
                             <p className="text-gray-400 text-lg">
                                 {activeTab === 'overview' && 'Vista general de las estadísticas y rendimiento.'}
                                 {activeTab === 'voters' && 'Consulta el historial detallado de participación.'}
                                 {activeTab === 'config' && 'Personaliza categorías, candidatos y aspectos del bot.'}
+                                {activeTab === 'my-votes' && 'Revisa y actualiza tus elecciones en tiempo real.'}
                             </p>
                         </div>
                         <div className="flex gap-4">
@@ -172,6 +177,9 @@ export const Dashboard = () => {
                                 )}
                                 {activeTab === 'config' && data && (
                                     <ConfigTab config={data.config} setConfig={(newConfig: any) => mutate({ ...data, config: newConfig }, false)} />
+                                )}
+                                {activeTab === 'my-votes' && data && (
+                                    <MyVotesTab config={data.config} />
                                 )}
                             </>
                         )}

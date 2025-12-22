@@ -4,7 +4,7 @@ export interface IVote extends Document {
     userId: string;
     username: string;
     robloxUser: string;
-    votes: Record<string, string>; // Map categoryId -> candidateValue
+    votes: Map<string, string>; // Map categoryId -> candidateValue
     createdAt: Date;
 }
 

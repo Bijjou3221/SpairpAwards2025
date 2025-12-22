@@ -156,6 +156,7 @@ app.get('/', (req, res) => {
 });
 
 // Login: Intercambia código por token y verifica admin
+// Login: Intercambia código por token y verifica admin
 app.post('/api/auth/login', async (req, res) => {
     const { code } = req.body;
     if (!code) return res.status(400).json({ error: 'Falta el código' });
@@ -173,29 +174,27 @@ app.post('/api/auth/login', async (req, res) => {
         const user = await oauth.getUser(tokenData.access_token);
         const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
 
-        // 3. Verificar Admin
+        // 3. Verificar Admin (pero dejar pasar a todos)
         const config = await AwardConfig.findOne();
         const dbAdminIds = config?.adminIds || [];
         const envAdminIds = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
         const allowedIds = [...new Set([...dbAdminIds, ...envAdminIds])];
 
-        if (!allowedIds.includes(user.id)) {
-            logger.warn(`Login Failed: User ${user.username} (${user.id}) from IP ${ip} is not an admin.`);
-            return res.status(403).json({
-                error: 'No tienes permisos de administrador.',
-                user: { id: user.id, username: user.username, avatar: user.avatar, ip: ip }
-            });
+        const isAdmin = allowedIds.includes(user.id);
+
+        if (!isAdmin) {
+            logger.info(`User Login: ${user.username} (${user.id}) logged in as REGULAR USER from ${ip}`);
+        } else {
+            logger.info(`✅ Admin Login: ${user.username} (${user.id}) logged in as ADMIN from ${ip}`);
         }
 
-        // 4. Generar JWT
+        // 4. Generar JWT (Incluir rol)
         if (!process.env.JWT_SECRET) throw new Error("JWT_SECRET missing");
         const jwtToken = jwt.sign(
-            { id: user.id, username: user.username, avatar: user.avatar },
+            { id: user.id, username: user.username, avatar: user.avatar, isAdmin },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
-
-        logger.info(`✅ Admin Login: ${user.username} (${user.id}) logged in successfully from ${ip}`);
 
         // 5. Set HttpOnly Cookie
         res.cookie('token', jwtToken, {
@@ -206,7 +205,8 @@ app.post('/api/auth/login', async (req, res) => {
         });
 
         // Return user info AND token for LocalStorage fallback (Fix Mobile Login)
-        res.json({ success: true, user, token: jwtToken });
+        // Add isAdmin info so frontend knows what to show
+        res.json({ success: true, user: { ...user, isAdmin }, token: jwtToken });
 
     } catch (error: any) {
         logger.error('Error Auth:', error.response?.data || error.message);
@@ -277,6 +277,52 @@ app.get('/api/stats', authMiddleware, async (req, res) => {
 
     } catch (e) {
         res.status(500).json({ error: 'Error stats' });
+    }
+});
+
+// GET My Vote
+app.get('/api/votes/me', authMiddleware, async (req, res) => {
+    try {
+        const userId = (req as any).user.id;
+        const vote = await Vote.findOne({ userId });
+        if (!vote) {
+            return res.json({ found: false });
+        }
+        res.json({ found: true, vote });
+    } catch (e) {
+        console.error('Error fetching my vote:', e);
+        res.status(500).json({ error: 'Error fetching vote' });
+    }
+});
+
+// UPDATE My Vote (Partial Update)
+app.put('/api/votes/me', authMiddleware, async (req, res) => {
+    try {
+        const userId = (req as any).user.id;
+        const { votes: newVotes } = req.body; // Expecting object { categoryId: candidateValue }
+
+        const vote = await Vote.findOne({ userId });
+        if (!vote) {
+            return res.status(404).json({ error: 'No se encontró tu voto previo. Por favor vota desde cero si es tu primera vez.' });
+        }
+
+        // Merge new votes
+        // Note: Check if vote.votes is a Map or Object depending on how mongoose handles it in TS vs Runtime
+        // Defined in Schema as Type MAP.
+
+        for (const [catId, val] of Object.entries(newVotes)) {
+            vote.votes.set(catId, val as string);
+        }
+
+        await vote.save();
+
+        logger.info(`✅ Voto actualizado para ${userId}: ${JSON.stringify(newVotes)}`);
+
+        res.json({ success: true, vote });
+
+    } catch (e) {
+        console.error('Error updating vote:', e);
+        res.status(500).json({ error: 'Error actualizando voto' });
     }
 });
 

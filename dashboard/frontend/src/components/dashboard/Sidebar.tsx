@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SidebarProps {
-    activeTab: 'overview' | 'voters' | 'config';
-    setActiveTab: (tab: 'overview' | 'voters' | 'config') => void;
+    activeTab: 'overview' | 'voters' | 'config' | 'my-votes';
+    setActiveTab: (tab: 'overview' | 'voters' | 'config' | 'my-votes') => void;
     user: any;
     handleLogout: () => void;
     totalVotes?: number;
@@ -56,25 +56,39 @@ export const Sidebar = ({ activeTab, setActiveTab, user, handleLogout, totalVote
             </div>
 
             <nav className="flex-1 p-6 space-y-3 overflow-y-auto">
+                {user.isAdmin && (
+                    <SidebarItem
+                        active={activeTab === 'overview'}
+                        onClick={() => { setActiveTab('overview'); setIsOpen(false); }}
+                        icon={<LayoutDashboard size={20} />}
+                        label="Panel Principal"
+                    />
+                )}
+
                 <SidebarItem
-                    active={activeTab === 'overview'}
-                    onClick={() => { setActiveTab('overview'); setIsOpen(false); }}
-                    icon={<LayoutDashboard size={20} />}
-                    label="Panel Principal"
-                />
-                <SidebarItem
-                    active={activeTab === 'voters'}
-                    onClick={() => { setActiveTab('voters'); setIsOpen(false); }}
-                    icon={<Users size={20} />}
-                    label="Votantes"
-                    badge={totalVotes}
-                />
-                <SidebarItem
-                    active={activeTab === 'config'}
-                    onClick={() => { setActiveTab('config'); setIsOpen(false); }}
+                    active={activeTab === 'my-votes'}
+                    onClick={() => { setActiveTab('my-votes'); setIsOpen(false); }}
                     icon={<Edit3 size={20} />}
-                    label="Configuración"
+                    label="Mis Votos"
                 />
+
+                {user.isAdmin && (
+                    <>
+                        <SidebarItem
+                            active={activeTab === 'voters'}
+                            onClick={() => { setActiveTab('voters'); setIsOpen(false); }}
+                            icon={<Users size={20} />}
+                            label="Votantes"
+                            badge={totalVotes}
+                        />
+                        <SidebarItem
+                            active={activeTab === 'config'}
+                            onClick={() => { setActiveTab('config'); setIsOpen(false); }}
+                            icon={<Edit3 size={20} />}
+                            label="Configuración"
+                        />
+                    </>
+                )}
 
                 <div className="pt-4 pb-2">
                     <p className="px-5 text-[10px] font-bold uppercase text-gray-600 tracking-wider">Sistema</p>

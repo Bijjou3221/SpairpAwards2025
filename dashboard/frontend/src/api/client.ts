@@ -62,4 +62,14 @@ export const getStats = async () => {
     return response.data;
 };
 
+export const getMyVote = async () => {
+    const response = await client.get('/votes/me');
+    return response.data;
+};
+
+export const updateMyVote = async (votes: Record<string, string>) => {
+    const response = await client.put('/votes/me', { votes });
+    return response.data;
+};
+
 export default client;
