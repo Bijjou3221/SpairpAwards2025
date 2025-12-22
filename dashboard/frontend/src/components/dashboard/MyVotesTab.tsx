@@ -76,7 +76,7 @@ export const MyVotesTab = ({ config }: MyVotesTabProps) => {
                             Se han realizado cambios importantes en las listas:
                         </p>
                         <ul className="list-disc list-inside text-yellow-200/70 text-sm space-y-1">
-                            <li><strong>Mejor DAO:</strong> Se ha añadido a <strong>Fulanito</strong>.</li>
+                            <li><strong>Mejor DAO:</strong> Se ha añadido a <strong>Kyzzi</strong>.</li>
                             <li><strong>Mejor GC:</strong> <strong>Paco_2010</strong> ha sido sustituido por <strong>Nana99772</strong> (Paco no asistirá a la gala).</li>
                         </ul>
                         <p className="text-yellow-200/80 leading-relaxed mt-2">
