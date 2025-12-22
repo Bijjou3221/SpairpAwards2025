@@ -15,7 +15,7 @@ import {
     X
 } from 'lucide-react';
 
-const DISCORD_CLIENT_ID = '1382837683788976279';
+const DISCORD_CLIENT_ID = '1354590046589816852';
 const REDIRECT_URI = 'https://spainrp.xyz';
 const AUTH_URL = `https://discord.com/api/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=code&scope=identify`;
 
