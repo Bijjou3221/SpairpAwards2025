@@ -47,8 +47,16 @@ export const ConfigTab = ({ config, setConfig }: ConfigTabProps) => {
 
     const removeCandidate = (catIndex: number, candIndex: number) => {
         if (!confirm('¿Estás seguro de eliminar este candidato?')) return;
-        const newAwards = [...config.awards];
-        newAwards[catIndex].candidates.splice(candIndex, 1);
+
+        const newAwards = config.awards.map((award, i) => {
+            if (i === catIndex) {
+                return {
+                    ...award,
+                    candidates: award.candidates.filter((_, j) => j !== candIndex)
+                };
+            }
+            return award;
+        });
         setConfig({ ...config, awards: newAwards });
     };
 
@@ -139,8 +147,18 @@ export const ConfigTab = ({ config, setConfig }: ConfigTabProps) => {
                                                 type="text"
                                                 value={cand.emoji}
                                                 onChange={(e) => {
-                                                    const newAwards = [...config.awards];
-                                                    newAwards[idx].candidates[cIdx].emoji = e.target.value;
+                                                    const newAwards = config.awards.map((award, aIdx) => {
+                                                        if (aIdx === idx) {
+                                                            const newCandidates = award.candidates.map((c, cIdxMap) => {
+                                                                if (cIdxMap === cIdx) {
+                                                                    return { ...c, emoji: e.target.value };
+                                                                }
+                                                                return c;
+                                                            });
+                                                            return { ...award, candidates: newCandidates };
+                                                        }
+                                                        return award;
+                                                    });
                                                     setConfig({ ...config, awards: newAwards });
                                                 }}
                                                 className="w-10 text-center bg-transparent text-2xl outline-none"
@@ -153,8 +171,18 @@ export const ConfigTab = ({ config, setConfig }: ConfigTabProps) => {
                                                 value={cand.label}
                                                 placeholder="Nombre Candidato"
                                                 onChange={(e) => {
-                                                    const newAwards = [...config.awards];
-                                                    newAwards[idx].candidates[cIdx].label = e.target.value;
+                                                    const newAwards = config.awards.map((award, aIdx) => {
+                                                        if (aIdx === idx) {
+                                                            const newCandidates = award.candidates.map((c, cIdxMap) => {
+                                                                if (cIdxMap === cIdx) {
+                                                                    return { ...c, label: e.target.value };
+                                                                }
+                                                                return c;
+                                                            });
+                                                            return { ...award, candidates: newCandidates };
+                                                        }
+                                                        return award;
+                                                    });
                                                     setConfig({ ...config, awards: newAwards });
                                                 }}
                                                 className="bg-transparent border-b border-white/10 px-1 py-0.5 text-sm text-white font-medium focus:border-gold outline-none w-full"
@@ -164,8 +192,18 @@ export const ConfigTab = ({ config, setConfig }: ConfigTabProps) => {
                                                 value={cand.value}
                                                 placeholder="Valor interno (ID)"
                                                 onChange={(e) => {
-                                                    const newAwards = [...config.awards];
-                                                    newAwards[idx].candidates[cIdx].value = e.target.value;
+                                                    const newAwards = config.awards.map((award, aIdx) => {
+                                                        if (aIdx === idx) {
+                                                            const newCandidates = award.candidates.map((c, cIdxMap) => {
+                                                                if (cIdxMap === cIdx) {
+                                                                    return { ...c, value: e.target.value };
+                                                                }
+                                                                return c;
+                                                            });
+                                                            return { ...award, candidates: newCandidates };
+                                                        }
+                                                        return award;
+                                                    });
                                                     setConfig({ ...config, awards: newAwards });
                                                 }}
                                                 className="bg-transparent border-none px-1 py-0 text-xs text-gray-500 font-mono focus:text-gray-300 outline-none w-full"
