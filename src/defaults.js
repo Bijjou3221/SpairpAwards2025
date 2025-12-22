@@ -33,7 +33,7 @@ module.exports = {
             title: '💚 Mejor GC',
             description: '### El agente de la Guardia Civil más destacado.',
             candidates: [
-                { label: 'Paco_2010pgamer', value: 'paco_2010', emoji: '💂' },
+                { label: 'Nana99772', value: 'nana', emoji: '💂' },
                 { label: 'Rodrix_tp', value: 'rodrix_tp', emoji: '💂' },
                 { label: 'melametemitio2', value: 'melametemitio2', emoji: '💂' }
             ]

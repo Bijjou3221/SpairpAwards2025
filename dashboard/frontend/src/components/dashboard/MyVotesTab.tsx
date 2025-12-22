@@ -57,7 +57,7 @@ export const MyVotesTab = ({ config }: MyVotesTabProps) => {
         }
     };
 
-    const targetCategory = 'mejor_dao';
+    const targetCategories = ['mejor_dao', 'mejor_gc'];
 
     return (
         <div className="space-y-6">
@@ -72,9 +72,15 @@ export const MyVotesTab = ({ config }: MyVotesTabProps) => {
                     </div>
                     <div>
                         <h3 className="font-bold text-yellow-100 text-xl mb-2">⚠️ Actualización de Candidatos</h3>
-                        <p className="text-yellow-200/80 leading-relaxed">
-                            Se ha añadido un nuevo candidato recientemente: <strong>Fulanito</strong>.
-                            <br />Si queréis cambiara vuestro voto en la categoría <strong>Mejor DAO</strong>, podéis editarlo aquí mismo sin necesidad de reiniciar todo.
+                        <p className="text-yellow-200/80 leading-relaxed mb-2">
+                            Se han realizado cambios importantes en las listas:
+                        </p>
+                        <ul className="list-disc list-inside text-yellow-200/70 text-sm space-y-1">
+                            <li><strong>Mejor DAO:</strong> Se ha añadido a <strong>Fulanito</strong>.</li>
+                            <li><strong>Mejor GC:</strong> <strong>Paco_2010</strong> ha sido sustituido por <strong>Nana99772</strong> (Paco no asistirá a la gala).</li>
+                        </ul>
+                        <p className="text-yellow-200/80 leading-relaxed mt-2">
+                            Si ya votaste, puedes modificar tu elección en estas categorías aquí mismo.
                         </p>
                     </div>
                 </div>
@@ -93,7 +99,7 @@ export const MyVotesTab = ({ config }: MyVotesTabProps) => {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {config.awards.map((cat: any) => {
-                        const isTarget = cat.id === targetCategory;
+                        const isTarget = targetCategories.includes(cat.id);
                         const userVoteVal = myVote.votes[cat.id];
                         const candidate = cat.candidates.find((c: any) => c.value === userVoteVal);
 
