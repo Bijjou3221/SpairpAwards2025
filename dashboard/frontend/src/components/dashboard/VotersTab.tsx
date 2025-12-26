@@ -1,6 +1,6 @@
 import { useState, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileDown, Search, ChevronDown, Users } from 'lucide-react';
+import { FileDown, Search, ChevronDown, Users, Trophy, Crown, Medal, Minus } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { AwardConfigType, Category, Candidate } from '../../types';
@@ -23,6 +23,37 @@ export const VotersTab = ({ stats, config }: VotersTabProps) => {
         v.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         v.robloxUser.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Calculate Winners Logic
+    const getWinnerStats = (catId: string) => {
+        const votes = stats.raw.map((v: any) => v.votes[catId]).filter(Boolean);
+        const counts: Record<string, number> = {};
+        votes.forEach((v: string) => counts[v] = (counts[v] || 0) + 1);
+
+        const sorted = Object.entries(counts).sort(([, a], [, b]) => b - a);
+        if (sorted.length === 0) return null;
+
+        const winner = sorted[0];
+        const second = sorted[1];
+        const isTie = second && winner[1] === second[1];
+        const diff = second ? winner[1] - second[1] : winner[1];
+
+        return {
+            winnerVal: winner[0],
+            winnerCount: winner[1],
+            secondVal: second ? second[0] : null,
+            secondCount: second ? second[1] : 0,
+            isTie,
+            diff
+        };
+    };
+
+    const getFlavorText = (diff: number, isTie: boolean) => {
+        if (isTie) return "¡Empate técnico! La comunidad está dividida.";
+        if (diff <= 3) return "¡Por los pelos! Una victoria de infarto.";
+        if (diff <= 10) return "Victoria sólida, pero con competencia digna.";
+        return "¡Dominio absoluto! El favorito indiscutible.";
+    };
 
     const handleExportPDF = async () => {
         if (!stats) return;
@@ -147,6 +178,84 @@ export const VotersTab = ({ stats, config }: VotersTabProps) => {
             initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
             className="space-y-8"
         >
+            {/* Winners Gallery Section */}
+            <div className="mb-12">
+                <div className="flex items-center gap-3 mb-6">
+                    <Trophy className="text-gold w-8 h-8" />
+                    <h2 className="text-2xl font-black text-white uppercase tracking-wider">Resultados Oficiales</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {config?.awards.map((cat: Category) => {
+                        const result = getWinnerStats(cat.id);
+                        if (!result) return null; // No votes yet
+
+                        const winnerCand = cat.candidates.find(c => c.value === result.winnerVal);
+                        const secondCand = cat.candidates.find(c => c.value === result.secondVal);
+
+                        return (
+                            <div key={cat.id} className="relative group bg-[#121212]/80 border border-gold/20 hover:border-gold/50 rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-[0_0_30px_rgba(212,175,55,0.1)]">
+                                {/* Background Effects */}
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-gold/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+
+                                <div className="p-6 relative z-10">
+                                    <div className="text-[10px] bg-white/5 border border-white/10 text-gray-400 px-2 py-1 rounded w-fit mb-3 uppercase tracking-wider font-bold">
+                                        {cat.title}
+                                    </div>
+
+                                    {/* Winner Display */}
+                                    <div className="flex flex-col items-center text-center py-2">
+                                        <div className="relative mb-3">
+                                            {result.isTie ? (
+                                                <div className="flex -space-x-4">
+                                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-800 to-black rounded-full flex items-center justify-center text-3xl border-2 border-gold/30 shadow-lg z-10">
+                                                        {winnerCand?.emoji}
+                                                    </div>
+                                                    <div className="w-16 h-16 bg-gradient-to-br from-gray-800 to-black rounded-full flex items-center justify-center text-3xl border-2 border-gold/30 shadow-lg grayscale opacity-70">
+                                                        {secondCand?.emoji || '?'}
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <>
+                                                    <Crown className="absolute -top-6 left-1/2 -translate-x-1/2 text-gold animate-bounce" size={24} fill="currentColor" />
+                                                    <div className="w-20 h-20 bg-gradient-to-br from-gold/20 to-black rounded-full flex items-center justify-center text-5xl border-2 border-gold shadow-[0_0_20px_rgba(212,175,55,0.3)]">
+                                                        {winnerCand?.emoji}
+                                                    </div>
+                                                </>
+                                            )}
+                                        </div>
+
+                                        <h3 className="text-xl font-black text-white leading-tight mb-1">
+                                            {result.isTie ? 'Empate' : winnerCand?.label}
+                                        </h3>
+                                        <p className="text-xs text-gold font-bold uppercase tracking-widest mb-4">
+                                            {result.isTie ? `${winnerCand?.label} & ${secondCand?.label}` : 'Ganador Indiscutible'}
+                                        </p>
+                                    </div>
+
+                                    {/* Stats & Flavor Text */}
+                                    <div className="bg-black/40 rounded-xl p-3 border border-white/5 space-y-2">
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-400">Total Votos</span>
+                                            <span className="text-white font-mono font-bold">{result.winnerCount}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-xs">
+                                            <span className="text-gray-400">{result.isTie ? 'Empate a' : 'Diferencia'}</span>
+                                            <span className={`font-mono font-bold ${result.isTie ? 'text-yellow-500' : 'text-green-400'}`}>
+                                                {result.isTie ? result.winnerCount : `+${result.diff}`}
+                                            </span>
+                                        </div>
+                                        <div className="h-px bg-white/5 my-2"></div>
+                                        <p className="text-[10px] text-gray-500 italic text-center leading-relaxed">
+                                            "{getFlavorText(result.diff, result.isTie)}"
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#121212]/50 backdrop-blur-sm p-4 rounded-xl border border-white/10">
                 <div className="w-full md:w-auto">
                     <h2 className="text-xl font-bold text-white">Registro de Votantes</h2>

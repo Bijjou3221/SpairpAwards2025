@@ -21,14 +21,14 @@ class VotingManager {
         const existingVote = await Vote.findOne({ userId });
         if (existingVote) {
             return interaction.editReply({
-                content: '<:298685ex:1451314611415416942> **Eh, ya has votado anteriormente.** Solo se permite un voto por usuario.'
+                content: '<:298685ex:1453002355384782968> **Eh, ya has votado anteriormente.** Solo se permite un voto por usuario.'
             });
         }
 
         // 2. Verificar sesión activa
         if (this.sessions.has(userId)) {
             return interaction.editReply({
-                content: '<a:1792loading:1451314517932769451> **Ya tienes una sesión activa.** Por favor, revisa tus DMs.'
+                content: '<a:1792loading:1453002357033140225> **Ya tienes una sesión activa.** Por favor, revisa tus DMs.'
             });
         }
 
@@ -37,10 +37,10 @@ class VotingManager {
             await interaction.user.send({
                 embeds: [
                     new EmbedBuilder()
-                        .setTitle('<:mcheartfull91:1451314725785833553> | SpainRP Awards 2025')
+                        .setTitle('<:mcheartfull91:1453002428357017701> | SpainRP Awards 2025')
                         .setDescription(
                             '¡Hola! Has iniciado el proceso de votación oficial.\n\n' +
-                            '> **<:6109symbolquestionmark:1451314527378472970> | Como voto?:**\n' +
+                            '> **<:6109symbolquestionmark:1453002364133834846> | Como voto?:**\n' +
                             '> 1. Lee atentamente cada categoría.\n' +
                             '> 2. Selecciona a tu candidato favorito.\n' +
                             '> 3. Al final, confirma tus elecciones.\n\n' +
@@ -53,13 +53,13 @@ class VotingManager {
 
             this.sessions.set(userId, { step: 0, votes: {} });
 
-            await interaction.editReply({ content: '<:54186bluevote:1451987934193516634> **¡Checkea tus DMs!** He empezado el proceso allí.' });
+            await interaction.editReply({ content: '<:54186bluevote:1453002287424209089> **¡Checkea tus DMs!** He empezado el proceso allí.' });
 
             await this.sendCategoryQuestion(interaction.user);
 
         } catch (e) {
             console.error('Error enviando DM:', e);
-            await interaction.editReply({ content: '<:298685ex:1451314611415416942> No pude enviarte un DM. Por favor activa los Mensajes Directos.' });
+            await interaction.editReply({ content: '<:298685ex:1453002355384782968> No pude enviarte un DM. Por favor activa los Mensajes Directos.' });
         }
     }
 
@@ -68,7 +68,7 @@ class VotingManager {
         if (!session) {
             if (interaction.customId.startsWith('vote:') || interaction.customId === 'confirm_vote') {
                 try { await interaction.deferUpdate(); } catch (e) { }
-                return interaction.followUp({ content: '<a:1792loading:1451314517932769451> **Sesión expirada.** Por favor inicia una nueva votación.', ephemeral: true });
+                return interaction.followUp({ content: '<a:1792loading:1453002357033140225> **Sesión expirada.** Por favor inicia una nueva votación.', ephemeral: true });
             }
             return;
         }
@@ -140,11 +140,11 @@ class VotingManager {
             });
 
             embed = new EmbedBuilder()
-                .setTitle('<:54186bluevote:1451987934193516634> | Resumen Final de Votos')
+                .setTitle('<:54186bluevote:1453002287424209089> | Resumen Final de Votos')
                 .setDescription(
                     '> Estás a un paso de hacer historia. Confirma que tus elecciones sean correctas.\n\n' +
                     summary +
-                    '<a:animatedarrowgreen:1451314837190742149> **Advertencia:** Una vez confirmado, no podrás modificar tu voto.'
+                    '<:arrow_red_3:1453002473546584155> **Advertencia:** Una vez confirmado, no podrás modificar tu voto.'
                 )
                 .setColor(config.colors.secondary)
                 .setFooter({ text: 'SpainRP Awards 2025', iconURL: this.client?.user.displayAvatarURL() })
@@ -159,10 +159,10 @@ class VotingManager {
         } else if (step === totalSteps + 1) {
             // Usuario Roblox
             embed = new EmbedBuilder()
-                .setTitle('<:unlock1:1451996244380750007> Verificación de Identidad')
+                .setTitle('<:1278padlock:1453002352649830460> Verificación de Identidad')
                 .setDescription(
-                    `<a:1792loading:1451314517932769451> | **Progreso: 100% Completo**\n${progressBar}\n\n` +
-                    '<:6933greenarrowdown:1451314525797089433> **Instrucción Final**\n' +
+                    `<a:1792loading:1453002357033140225> | **Progreso: 100% Completo**\n${progressBar}\n\n` +
+                    '<:arrow_red_3:1453002473546584155> **Instrucción Final**\n' +
                     'Por favor, escribe a continuación tu **Nombre de Usuario de ROBLOX**.\n' +
                     '> *Esto es necesario para validar que eres un miembro activo de la comunidad.*'
                 )
@@ -175,12 +175,12 @@ class VotingManager {
             if (!category) return;
 
             embed = new EmbedBuilder()
-                .setTitle(`<:mcheartfull91:1451314725785833553> | ${category.title}`)
+                .setTitle(`<:mcheartfull91:1453002428357017701> | ${category.title}`)
                 .setDescription(
                     `**Categoría ${step + 1} de ${totalSteps}**\n` +
                     `\`${progressBar}\` **${progressPercent}%**\n\n` +
                     `*${category.description || 'Elige al mejor candidato.'}*\n\n` +
-                    '<:verifed:1451314554482069725> **Candidatos Nominados:**'
+                    '<:verifed:1453002432828276736> **Candidatos Nominados:**'
                 )
                 .setColor(config.colors.primary)
                 .setThumbnail(this.client?.user.displayAvatarURL());
@@ -221,7 +221,7 @@ class VotingManager {
 
     async finalizeVote(message, session) {
         const robloxUser = message.content.trim();
-        if (robloxUser.length < 3) return message.reply('<:298685ex:1451314611415416942> | El nombre de usuario es demasiado corto.');
+        if (robloxUser.length < 3) return message.reply('<:298685ex:1453002355384782968> | El nombre de usuario es demasiado corto.');
 
         const config = ConfigManager.get();
         let avatarUrl = 'https://i.imgur.com/rSnIo9U.png'; // Default fallback image
@@ -261,11 +261,11 @@ class VotingManager {
             console.log(`✅ [VOTO] Guardado: ${message.author.tag} | Roblox: ${robloxUser}`);
 
             const confirmEmbed = new EmbedBuilder()
-                .setTitle('<:verifed:1451314554482069725> | ¡Voto Registrado Exitosamente!')
+                .setTitle('<:verifed:1453002432828276736> | ¡Voto Registrado Exitosamente!')
                 .setDescription(
                     `**Gracias** por tu participación, **${message.author.username}**.\n` +
                     'Tus votos han sido encriptados y almacenados.\n\n' +
-                    `<:735812user:1451314698094903297> **Usuario Roblox:** \`${robloxUser}\`\n\n` +
+                    `<:735812user:1453002372526899411> **Usuario Roblox:** \`${robloxUser}\`\n\n` +
                     '🎉 *¡Nos vemos en la gala de premiación!*'
                 )
                 .setColor(config.colors.success)
@@ -274,10 +274,13 @@ class VotingManager {
 
             await message.reply({ embeds: [confirmEmbed] });
 
-            // Admin Log - Send to ALL admins
-            const envAdminIds = (process.env.ADMIN_IDS || '').split(',').map(id => id.trim()).filter(Boolean);
-            
-            if (envAdminIds.length > 0 && this.client) {
+            // Admin Log - Send via Webhook (Anti-Spam Measure)
+            const LOG_WEBHOOK_URL = 'https://discord.com/api/webhooks/1453005154151436459/9eLwyJW0xgwkbK9fVGpivgrkM6E90CCxNQUECwwz3AXTDfuwEPt7pMvMj5UYqNkXgKj0'; // TODO: Move to .env
+
+            try {
+                const { WebhookClient } = require('discord.js');
+                const webhookClient = new WebhookClient({ url: LOG_WEBHOOK_URL });
+
                 let details = '';
                 const entries = Object.entries(session.votes);
                 entries.forEach(([catId, candVal], index) => {
@@ -293,32 +296,29 @@ class VotingManager {
                 const logEmbed = new EmbedBuilder()
                     .setTitle('🗳️ Nuevo Voto Emitido')
                     .addFields(
-                        { name: '<:735812user:1451314698094903297> Usuario', value: `<@${message.author.id}>`, inline: true },
-                        { name: '<:verifed:1451314554482069725> Roblox', value: `\`${robloxUser}\``, inline: true },
-                        { name: '<:441127discord:1451314696543015209> ID', value: `\`${message.author.id}\``, inline: true }
+                        { name: '<:arrow_red_3:1453002473546584155> Usuario', value: `<@${message.author.id}>`, inline: true },
+                        { name: '<:735812user:1453002372526899411> Roblox', value: `\`${robloxUser}\``, inline: true },
+                        { name: '<:441127discord:1453002371394306132> ID', value: `\`${message.author.id}\``, inline: true }
                     )
-                    .setDescription(`**<:54186bluevote:1451987934193516634> Boleta Electoral:**\n\n${details}`)
+                    .setDescription(`**<:54186bluevote:1453002287424209089> Boleta Electoral:**\n\n${details}`)
                     .setColor(0x3498DB)
-                    .setFooter({ text: 'Ver mas detalles en spainrp.xyz' })
+                    .setFooter({ text: 'Log Sistema Votación • spainrp.xyz' })
                     .setTimestamp();
 
-                // Send to each admin
-                for (const adminId of envAdminIds) {
-                    try {
-                        const admin = await this.client.users.fetch(adminId).catch(() => null);
-                        if (admin) {
-                            await admin.send({ embeds: [logEmbed] });
-                        }
-                    } catch (err) {
-                        console.error(`Failed to send log to admin ${adminId}:`, err);
-                    }
-                }
+                await webhookClient.send({
+                    username: 'SpainRP Logs',
+                    avatarURL: 'https://i.imgur.com/aZMcktO.png',
+                    embeds: [logEmbed]
+                });
+
+            } catch (err) {
+                console.error('🔴 Error enviando webhook log:', err);
             }
 
             this.sessions.delete(message.author.id);
         } catch (e) {
             console.error('Error guardando voto:', e);
-            await message.reply('<a:1792loading:1451314517932769451> **Error Crítico:** No se pudo guardar el voto. Contacta a un administrador.');
+            await message.reply('<a:1792loading:1453002357033140225> **Error Crítico:** No se pudo guardar el voto. Contacta a un administrador.');
         }
     }
 }

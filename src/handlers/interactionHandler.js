@@ -31,19 +31,19 @@ async function handleCommand(interaction, client) {
         await interaction.deferReply({ flags: [MessageFlags.Ephemeral] });
         // Refrescamos config antes de enviar
         await ConfigManager.load();
-
+        
         const embed = new EmbedBuilder()
             .setDescription(
-                `# <:spainrp_iconoremovebgpreview:1451314972339601488> SpainRP Awards 2025\n\n` +
+                `# <:logo_espana__1_removebgpreview:1453002507063136256> SpainRP Awards 2025\n\n` +
                 `> *Celebramos la **excelencia**, el **talento** y la **dedicación** de nuestra comunidad.*\n\n` +
-                `<:mcheartfull91:1451314725785833553> **TU VOTO DECIDE LA HISTORIA**\n` +
+                `<:mcheartfull91:1453002428357017701> **TU VOTO DECIDE LA HISTORIA**\n` +
                 `El poder está en tus manos. Elige a quienes marcaron la diferencia este año.\n\n` +
-                `<:6933greenarrowdown:1451314525797089433> **PROCESO DE VOTACIÓN**\n` +
+                `<:arrow_red_3:1453002473546584155> **PROCESO DE VOTACIÓN**\n` +
                 `\` 1 \` Pulsa **Empezar Votación** aquí abajo.\n\n` +
                 `\` 2 \` Revisa tus **Mensajes Privados (MD)**.\n\n` +
                 `\` 3 \` **Selecciona** a tus favoritos en cada categoría.\n\n` +
                 `\` 4 \` Valida tu identidad con tu usuario de **Roblox**.\n\n` +
-                `<:verifed:1451314554482069725> *Sistema de votación seguro.*`
+                `<:verifed:1453002432828276736> *Sistema de votación seguro.*`
             )
             .setColor(0xD4AF37)
             .setImage('https://media.discordapp.net/attachments/1427072984182423716/1451313021602496632/Gold_Modern_Elegant_Awards_Night_Presentation.png?ex=6945b814&is=69446694&hm=d7bc82082cb7236b8b3ef81770de3ed80b482f5b4afd742e9e145008a2101031&=&format=webp&quality=lossless')
