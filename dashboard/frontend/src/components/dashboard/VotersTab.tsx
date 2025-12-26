@@ -1,6 +1,6 @@
 import { useState, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileDown, Search, ChevronDown, Users, Trophy, Crown, Medal, Minus } from 'lucide-react';
+import { FileDown, Search, ChevronDown, Users, Trophy, Crown } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { AwardConfigType, Category, Candidate } from '../../types';
