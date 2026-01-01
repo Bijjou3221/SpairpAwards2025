@@ -14,6 +14,8 @@ import { VotersTab } from '../components/dashboard/VotersTab';
 import { ConfigTab } from '../components/dashboard/ConfigTab';
 import { MyVotesTab } from '../components/dashboard/MyVotesTab';
 
+import ClosureBanner from '../components/ui/ClosureBanner';
+
 const fetcher = async () => {
     const [config, stats] = await Promise.all([getConfig(), getStats()]);
     return { config, stats };
@@ -133,6 +135,10 @@ export const Dashboard = () => {
                 </div>
 
                 <div className="relative z-10">
+                    <div className="mb-6 -mx-2 lg:-mx-6">
+                        <ClosureBanner />
+                    </div>
+
                     <header className="flex justify-between items-end mb-10">
                         <div>
                             <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-gray-200 to-gray-400 mb-2 tracking-tight">

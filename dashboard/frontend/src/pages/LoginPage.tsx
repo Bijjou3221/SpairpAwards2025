@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { loginWithDiscord } from '../api/client';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
+import ClosureBanner from '../components/ui/ClosureBanner';
 import { Countdown } from '../components/Countdown';
 import { ForbiddenPage } from './ForbiddenPage';
 import {
@@ -139,6 +140,7 @@ export const LoginPage = () => {
     return (
         <div className="min-h-screen bg-[#050505] text-white flex flex-col font-sans selection:bg-gold/30 relative overflow-hidden cursor-none">
 
+            <ClosureBanner />
             <CustomCursor />
 
             <AnimatePresence>
